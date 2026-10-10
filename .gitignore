@@ -1,0 +1,12 @@
+# Local credentials and reports
+.env
+.env.*
+*config.local.json
+jev-config.json
+*.log
+ui-review-runtime*.json
+ui-review-report*.json
+.DS_Store
+node_modules/
+evaluation/artifacts/
+releases/backups/

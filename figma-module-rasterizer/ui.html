@@ -1,0 +1,1791 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>电商AI提效工具</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: var(--figma-color-bg, #ffffff);
+        --text: var(--figma-color-text, #1f1f1f);
+        --muted: var(--figma-color-text-secondary, #6b6b6b);
+        --border: var(--figma-color-border, #dedede);
+        --hover: var(--figma-color-bg-hover, #f5f5f5);
+        --brand: var(--figma-color-bg-brand, #0d99ff);
+        --brand-text: var(--figma-color-text-onbrand, #ffffff);
+        --danger: var(--figma-color-text-danger, #d92d20);
+        --panel: var(--figma-color-bg-secondary, #f7f7f7);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        font: 12px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        height: 560px;
+      }
+
+      body.compact .shell {
+        grid-template-rows: auto auto auto;
+        height: 178px;
+      }
+
+      header {
+        padding: 16px 16px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .head-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .back {
+        height: 22px;
+        padding: 0 8px;
+        font-size: 12px;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        cursor: pointer;
+      }
+
+      .back:hover {
+        background: var(--hover);
+      }
+
+      .selected {
+        display: grid;
+        gap: 4px;
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .selected-name {
+        overflow: hidden;
+        font-weight: 650;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .meta {
+        color: var(--muted);
+      }
+
+      .controls {
+        display: grid;
+        gap: 10px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      body.compact .controls {
+        padding-top: 10px;
+      }
+
+      .button-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      body.compact .button-row {
+        grid-template-columns: 1fr;
+      }
+
+      body.compact #download,
+      body.compact .list {
+        display: none;
+      }
+
+      button {
+        height: 32px;
+        padding: 0 11px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        color: var(--text);
+        background: var(--bg);
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--hover);
+      }
+
+      button.primary {
+        border-color: var(--brand);
+        color: var(--brand-text);
+        background: var(--brand);
+      }
+
+      button.primary:hover {
+        filter: brightness(0.96);
+      }
+
+      button:disabled {
+        cursor: default;
+        opacity: 0.48;
+      }
+
+      /* "生成模块组件"：按钮保持正常居中样式，副标题放在按钮下方 4px 处。 */
+      .make-block {
+        display: grid;
+        gap: 4px;
+      }
+
+      /* Divider between the PNG buttons and the "生成模块组件" block.
+         Negative horizontal margin cancels .controls' 16px padding so the line
+         reaches both panel edges; vertical margin opens up the spacing. */
+      .divider {
+        height: 0;
+        margin: 8px -16px;
+        border: 0;
+        border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-sub {
+        color: rgba(0, 0, 0, 0.3);
+        line-height: 1.35;
+        text-align: left;
+      }
+
+      .list-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 16px 7px;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .link {
+        height: auto;
+        padding: 0;
+        border: 0;
+        color: var(--brand);
+        background: transparent;
+      }
+
+      .list {
+        overflow: auto;
+      }
+
+      .item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        width: 100%;
+        height: auto;
+        padding: 10px 16px;
+        border: 0;
+        border-bottom: 1px solid var(--border);
+        border-radius: 0;
+        text-align: left;
+        background: transparent;
+      }
+
+      .item:hover,
+      .item.selected-item {
+        background: var(--hover);
+      }
+
+      .item-name {
+        overflow: hidden;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .item-path {
+        overflow: hidden;
+        color: var(--muted);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .pill {
+        align-self: center;
+        padding: 2px 6px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--muted);
+        background: var(--bg);
+      }
+
+      .empty,
+      .error {
+        padding: 18px 16px;
+        color: var(--muted);
+      }
+
+      .error {
+        color: var(--danger);
+      }
+
+      footer {
+        min-height: 30px;
+        padding: 7px 16px;
+        color: var(--muted);
+        border-top: 1px solid var(--border);
+      }
+
+      body.compact footer {
+        min-height: 40px;
+      }
+
+      /* Workspace mode */
+      main.workspace {
+        display: none;
+        grid-template-rows: auto auto auto;
+      }
+
+      body.workspace .shell {
+        display: none;
+      }
+
+      body.workspace main.workspace {
+        display: grid;
+      }
+
+      /* Validation mode */
+      main.validation {
+        display: none;
+        grid-template-rows: auto auto auto auto auto auto auto;
+      }
+
+      body.validation .shell,
+      body.validation .workspace,
+      body.validation main.chooser {
+        display: none;
+      }
+
+      body.validation main.validation {
+        display: grid;
+      }
+
+      .val-raw {
+        display: grid;
+        gap: 8px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .val-raw-note {
+        color: var(--muted);
+      }
+
+      .val-raw-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .val-raw-actions[hidden] {
+        display: none;
+      }
+
+      /* Hotspot config section (shown after a package is generated). */
+      .val-hotspots {
+        display: grid;
+        gap: 8px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .val-hotspots[hidden] {
+        display: none;
+      }
+
+      .val-hotspot-current {
+        color: var(--muted);
+      }
+
+      .val-hotspot-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .val-hotspot-row label {
+        color: var(--muted);
+      }
+
+      .val-hotspot-row select {
+        flex: 1;
+        height: 30px;
+        min-width: 0;
+        padding: 0 8px;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+      }
+
+      .val-hotspot-row button {
+        flex-shrink: 0;
+      }
+
+      .val-hotspot-list {
+        display: grid;
+        gap: 4px;
+      }
+
+      .val-hotspot-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--text);
+      }
+
+      .val-hotspot-info {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .val-hotspot-del {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        cursor: pointer;
+      }
+
+      .val-hotspot-del:hover {
+        color: var(--danger);
+        background: var(--hover);
+      }
+
+      .val-preview {
+        max-height: 360px;
+        overflow: auto;
+        padding: 12px 16px;
+      }
+
+      .val-page {
+        margin-bottom: 16px;
+      }
+
+      .val-page-label {
+        margin-bottom: 6px;
+        color: var(--muted);
+      }
+
+      .val-page-img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .val-actions {
+        display: grid;
+        gap: 8px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+      }
+
+      .val-actions[hidden] {
+        display: none;
+      }
+
+      /* Mode chooser */
+      main.chooser {
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+        padding: 20px 16px;
+      }
+
+      body.chooser .shell,
+      body.chooser .workspace {
+        display: none;
+      }
+
+      body.chooser main.chooser {
+        display: flex;
+      }
+
+      main.chooser p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      /* Landing entry (total entry) — shown first; clicking reveals choices. */
+      .entry {
+        display: block;
+        width: 100%;
+        height: auto;
+        padding: 16px 20px;
+        text-align: left;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel);
+        cursor: pointer;
+      }
+
+      .entry:hover {
+        background: var(--hover);
+      }
+
+      .entry-title {
+        display: block;
+        font-size: 17px;
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .entry-sub {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+      }
+
+      /* Disabled entry (feature not ready) keeps a plain look, no hover. */
+      .entry:disabled {
+        cursor: default;
+        opacity: 0.55;
+      }
+
+      .entry:disabled:hover {
+        background: var(--panel);
+      }
+
+      .soon {
+        margin-left: 8px;
+        padding: 1px 7px;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0;
+        vertical-align: middle;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+      }
+
+      /* Step switching: landing first, choices after clicking the entry. */
+      main.chooser .choices {
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      main.chooser.step-choices .entry {
+        display: none;
+      }
+
+      main.chooser.step-choices .choices {
+        display: flex;
+      }
+
+      /* Mode choice cards */
+      .choice {
+        display: grid;
+        gap: 3px;
+        height: auto;
+        padding: 14px 16px;
+        text-align: left;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg);
+        cursor: pointer;
+      }
+
+      .choice:hover {
+        background: var(--hover);
+      }
+
+      .choice .title {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .choice .desc {
+        color: var(--muted);
+      }
+
+      .workspace header {
+        padding: 16px 16px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .ws-stats {
+        display: grid;
+        gap: 10px;
+        padding: 14px 16px;
+      }
+
+      .ws-stat {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .ws-stat .label {
+        color: var(--muted);
+      }
+
+      .ws-stat .value {
+        font-weight: 650;
+      }
+
+      .ws-url {
+        display: grid;
+        gap: 4px;
+      }
+
+      .ws-url input {
+        height: 30px;
+        padding: 0 8px;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+      }
+
+      .ws-actions {
+        display: grid;
+        gap: 8px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+      }
+
+      .ws-empty {
+        padding: 18px 16px;
+        color: var(--muted);
+      }
+
+      textarea#payload {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+      }
+
+      /* Hint note under the selection block, with an inline blue "skill" link. */
+      .hint-note {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .link-inline {
+        color: var(--brand);
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .link-inline:hover {
+        text-decoration: underline;
+      }
+
+      /* Same brand color as the link, but non-interactive (no hover/cursor). */
+      .text-brand {
+        color: var(--brand);
+      }
+
+      /* Skill modal */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.4);
+      }
+
+      .modal-overlay[hidden] {
+        display: none;
+      }
+
+      .modal {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 320px;
+        max-height: 100%;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.24);
+      }
+
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .modal-head h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .modal-close {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        font-size: 18px;
+        line-height: 1;
+        color: var(--muted);
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .modal-close:hover {
+        background: var(--hover);
+      }
+
+      .modal-body {
+        padding: 16px;
+        overflow: auto;
+        line-height: 1.5;
+      }
+
+      .code-block {
+        margin: 0;
+        max-height: 220px;
+        overflow: auto;
+        padding: 12px;
+        color: var(--text);
+        font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre-wrap;
+        word-break: break-all;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .modal-foot {
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+      }
+
+      .modal-foot .primary {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body class="chooser">
+    <main class="chooser">
+      <button class="entry" id="entryValidation">
+        <span class="entry-title">Design to Validation</span>
+        <span class="entry-sub">将设计稿转为可运行 HTML，验证真实场景下的交互和流程</span>
+      </button>
+
+      <div class="choices">
+        <p>选择挑选模块的方式：</p>
+        <button class="choice" id="chooseManual">
+          <span class="title">手动</span>
+          <span class="desc">自己选中图层，逐个原位替换成 PNG。</span>
+        </button>
+        <button class="choice" id="chooseAuto">
+          <span class="title">自动</span>
+          <span class="desc">选中一个 Frame，自动识别模块并生成工作区。</span>
+        </button>
+      </div>
+    </main>
+
+    <main class="shell">
+      <header>
+        <div class="head-row">
+          <button class="back" id="backManual">← 返回</button>
+        </div>
+        <section class="selected" id="selected">
+          <div class="selected-name">未选中图层</div>
+          <div class="meta">选中一个 frame，进行模块位置和间距的定位</div>
+        </section>
+        <p class="hint-note">操作完成后结合 <a href="#" class="link-inline" id="skillLink">skill</a> 生成完整的 hand-off 包</p>
+      </header>
+
+      <section class="controls">
+        <div class="button-row">
+          <button id="download">生成副本</button>
+          <button id="replace" class="primary">替换为 PNG</button>
+        </div>
+        <hr class="divider" />
+        <div class="make-block">
+          <button id="makeComponents">生成模块组件</button>
+          <div class="btn-sub">选择新增或调整后的组件，生成独立模块 Handoff 包，帮助前端更准确还原</div>
+        </div>
+      </section>
+
+      <section class="list">
+        <div class="list-head">
+          <span id="count">0 个模块</span>
+          <button class="link" id="rescan">刷新</button>
+        </div>
+        <div id="items"></div>
+      </section>
+
+      <footer id="status">就绪</footer>
+    </main>
+
+    <main class="workspace">
+      <header>
+        <div class="head-row">
+          <button class="back" id="backAuto">← 返回</button>
+          <h1>模块工作区</h1>
+        </div>
+      </header>
+
+      <section class="ws-stats" id="wsStats">
+        <div class="ws-empty" id="wsEmpty">
+          选中一个 Frame 并运行<strong>生成模块工作区</strong>。
+        </div>
+        <div id="wsDetails" style="display: none;">
+          <div class="ws-stat">
+            <span class="label">源 Frame</span>
+            <span class="value" id="wsSource">—</span>
+          </div>
+          <div class="ws-stat">
+            <span class="label">识别到的模块</span>
+            <span class="value" id="wsDetected">0</span>
+          </div>
+          <div class="ws-stat">
+            <span class="label">已选中占位图</span>
+            <span class="value" id="wsSelected">0</span>
+          </div>
+          <div class="ws-stat">
+            <span class="label">已收集的模块</span>
+            <span class="value" id="wsCollected">0</span>
+          </div>
+          <label class="ws-url">
+            <span class="label">Figma 文件 URL（可选）</span>
+            <input id="wsFileUrl" type="text" placeholder="https://www.figma.com/design/..." />
+          </label>
+        </div>
+      </section>
+
+      <section class="ws-actions">
+        <button id="wsRefresh">刷新选区</button>
+        <button id="wsAdd" class="primary">添加选中的占位图</button>
+        <button id="wsCopy">复制 MCP 数据</button>
+      </section>
+
+      <footer id="wsStatus">就绪</footer>
+    </main>
+
+    <main class="validation">
+      <header>
+        <div class="head-row">
+          <button class="back" id="backValidation">← 返回</button>
+          <h1>Design to Validation</h1>
+        </div>
+        <p class="hint-note">选中多个页面 Frame，生成可运行的 HTML 验证包</p>
+      </header>
+
+      <section class="val-raw">
+        <div class="val-raw-note" id="rawHtmlTarget">选中一个节点，按 2.html 的 inline-style 逻辑生成 HTML。</div>
+        <button id="genRawHtml" disabled>生成 Raw HTML</button>
+        <button id="genHtmlPackage" class="primary" disabled>批量导出 HTML 文件包</button>
+        <button id="sendHtmlPackage" class="primary" disabled>发送并打开 Web MVP</button>
+        <div class="val-raw-actions" id="rawHtmlActions" hidden>
+          <button id="rawCopyHtml">复制 Raw HTML</button>
+          <button id="rawDownloadHtml">下载 raw.html</button>
+        </div>
+      </section>
+
+      <section class="val-hotspots" id="valHotspots" hidden>
+        <div class="val-hotspot-current" id="valHotspotCurrent">在页面 Frame 内选中一个子节点作为热点区域</div>
+        <div class="val-hotspot-row">
+          <label for="valHotspotAction">动作</label>
+          <select id="valHotspotAction">
+            <option value="navigate">跳转页面</option>
+            <option value="overlay">打开浮层</option>
+            <option value="closeOverlay">关闭浮层</option>
+            <option value="back">返回上一页</option>
+          </select>
+        </div>
+        <div class="val-hotspot-row" id="valHotspotTargetRow">
+          <label for="valHotspotTarget">目标</label>
+          <select id="valHotspotTarget"></select>
+        </div>
+        <button id="valAddHotspot" disabled>添加热点</button>
+        <div class="val-hotspot-list" id="valHotspotList"></div>
+        <button class="link" id="valClearHotspots" hidden>清空热点</button>
+      </section>
+
+      <section class="val-preview" id="valPreview" hidden></section>
+
+      <section class="val-actions" id="valActions" hidden>
+        <button id="valDownloadZip" class="primary">下载验证包</button>
+      </section>
+
+      <footer id="valStatus">就绪</footer>
+    </main>
+
+    <textarea id="payload" readonly></textarea>
+
+    <div class="modal-overlay" id="skillModal" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="skillModalTitle">
+        <div class="modal-head">
+          <h2 id="skillModalTitle">发送一下 skill 给 AI 安装</h2>
+          <button class="modal-close" id="skillModalClose" aria-label="关闭">×</button>
+        </div>
+        <div class="modal-body">
+          <pre class="code-block" id="skillCommand"></pre>
+        </div>
+        <div class="modal-foot">
+          <button class="primary" id="skillCopy">复制</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const selectedEl = document.getElementById("selected");
+      const itemsEl = document.getElementById("items");
+      const countEl = document.getElementById("count");
+      const statusEl = document.getElementById("status");
+      const downloadEl = document.getElementById("download");
+      const replaceEl = document.getElementById("replace");
+      const rescanEl = document.getElementById("rescan");
+
+      const wsEmptyEl = document.getElementById("wsEmpty");
+      const wsDetailsEl = document.getElementById("wsDetails");
+      const wsSourceEl = document.getElementById("wsSource");
+      const wsDetectedEl = document.getElementById("wsDetected");
+      const wsSelectedEl = document.getElementById("wsSelected");
+      const wsCollectedEl = document.getElementById("wsCollected");
+      const wsFileUrlEl = document.getElementById("wsFileUrl");
+      const wsRefreshEl = document.getElementById("wsRefresh");
+      const wsAddEl = document.getElementById("wsAdd");
+      const wsCopyEl = document.getElementById("wsCopy");
+      const wsStatusEl = document.getElementById("wsStatus");
+      const payloadEl = document.getElementById("payload");
+      const chooseManualEl = document.getElementById("chooseManual");
+      const chooseAutoEl = document.getElementById("chooseAuto");
+      const entryValidationEl = document.getElementById("entryValidation");
+      const backManualEl = document.getElementById("backManual");
+      const backAutoEl = document.getElementById("backAuto");
+      const backValidationEl = document.getElementById("backValidation");
+      const makeComponentsEl = document.getElementById("makeComponents");
+
+      // Validation-mode elements.
+      const rawHtmlTargetEl = document.getElementById("rawHtmlTarget");
+      const genRawHtmlEl = document.getElementById("genRawHtml");
+      const genHtmlPackageEl = document.getElementById("genHtmlPackage");
+      const sendHtmlPackageEl = document.getElementById("sendHtmlPackage");
+      const rawHtmlActionsEl = document.getElementById("rawHtmlActions");
+      const rawCopyHtmlEl = document.getElementById("rawCopyHtml");
+      const rawDownloadHtmlEl = document.getElementById("rawDownloadHtml");
+      const valHotspotsEl = document.getElementById("valHotspots");
+      const valHotspotCurrentEl = document.getElementById("valHotspotCurrent");
+      const valHotspotActionEl = document.getElementById("valHotspotAction");
+      const valHotspotTargetRowEl = document.getElementById("valHotspotTargetRow");
+      const valHotspotTargetEl = document.getElementById("valHotspotTarget");
+      const valAddHotspotEl = document.getElementById("valAddHotspot");
+      const valHotspotListEl = document.getElementById("valHotspotList");
+      const valClearHotspotsEl = document.getElementById("valClearHotspots");
+      const valPreviewEl = document.getElementById("valPreview");
+      const valActionsEl = document.getElementById("valActions");
+      const valDownloadZipEl = document.getElementById("valDownloadZip");
+      const valStatusEl = document.getElementById("valStatus");
+      const skillLinkEl = document.getElementById("skillLink");
+      const skillModalEl = document.getElementById("skillModal");
+      const skillModalCloseEl = document.getElementById("skillModalClose");
+      const skillCommandEl = document.getElementById("skillCommand");
+      const skillCopyEl = document.getElementById("skillCopy");
+
+      // One-line install command shown in the skill modal (copied verbatim).
+      const SKILL_COMMAND =
+        "git clone --depth 1 https://github.com/22yuran/AI-work-flow.git /tmp/aiwf && cp -r /tmp/aiwf/plugins/figma-handoff/skills/figma-handoff ~/.claude/skills/figma-handoff && rm -rf /tmp/aiwf";
+      skillCommandEl.textContent = SKILL_COMMAND;
+
+      let mode = "full";
+      let fullStage = "copy"; // "copy" = no copy yet; "png" = a copy exists — only drives the selection hint text
+      let selected = null;
+      let selectedCount = 0;
+      let candidates = [];
+      // Validation mode: latest generated package file contents + object URLs.
+      let valFiles = { indexHtml: "", stylesCss: "", interactionsJson: "" };
+      let valPngs = []; // [{ fileName, url }]
+      let valPackageKind = "png";
+      let rawHtmlFile = { fileName: "", html: "" };
+
+      window.onmessage = (event) => {
+        const message = event.data.pluginMessage;
+
+        if (message.type === "init") {
+          mode = message.mode;
+          fullStage = "copy";
+          if (mode === "chooser") {
+            document.querySelector("main.chooser").classList.remove("step-choices");
+          }
+          document.body.classList.toggle("chooser", mode === "chooser");
+          document.body.classList.toggle("compact", mode === "compact");
+          document.body.classList.toggle("full", mode === "full");
+          document.body.classList.toggle("workspace", mode === "workspace");
+          document.body.classList.toggle("validation", mode === "validation");
+          replaceEl.textContent = getReplaceButtonLabel();
+          measureAndResize();
+        }
+
+        if (message.type === "copy-created") {
+          // A copy now exists; switch the selection hint to the in-copy guidance.
+          fullStage = "png";
+          renderSelection();
+        }
+
+        if (message.type === "state") {
+          selected = message.selected;
+          selectedCount = message.selectedCount || 0;
+          candidates = message.candidates;
+          render();
+          setStatus("就绪");
+        }
+
+        if (message.type === "workspace-state") {
+          renderWorkspace(message);
+        }
+
+        if (message.type === "payload") {
+          copyPayload(message.json);
+        }
+
+        if (message.type === "download") {
+          downloadBytes(message.fileName, message.bytes);
+          setStatus(`已下载 ${message.fileName}`);
+        }
+
+        if (message.type === "error") {
+          setStatus(message.message, true);
+          setWsStatus(message.message, true);
+          setValStatus(message.message, true);
+        }
+
+        if (message.type === "status") {
+          setStatus(message.message, message.isError);
+        }
+
+        if (message.type === "validation-state") {
+          renderValidationState(message);
+        }
+
+        if (message.type === "validation-package") {
+          renderValidationPackage(message);
+        }
+
+        if (message.type === "validation-files") {
+          valPackageKind = message.packageKind || valPackageKind;
+          valFiles = {
+            indexHtml: message.indexHtml || valFiles.indexHtml,
+            stylesCss: message.stylesCss || valFiles.stylesCss,
+            interactionsJson: message.interactionsJson || valFiles.interactionsJson
+          };
+        }
+
+        if (message.type === "raw-html") {
+          rawHtmlFile = {
+            fileName: message.fileName || "raw.html",
+            html: message.html || ""
+          };
+          rawHtmlActionsEl.hidden = !rawHtmlFile.html;
+          setValStatus(`已生成 ${rawHtmlFile.fileName}`);
+          measureAndResize();
+        }
+
+        if (message.type === "html-package") {
+          if (message.delivery === "web-mvp") {
+            sendHtmlPackageToWebMvp(message);
+          } else {
+            downloadHtmlPackage(message);
+          }
+        }
+      };
+
+      chooseManualEl.addEventListener("click", () => {
+        post({ type: "choose-mode", mode: "manual" });
+      });
+
+      chooseAutoEl.addEventListener("click", () => {
+        post({ type: "choose-mode", mode: "auto" });
+      });
+
+      entryValidationEl.addEventListener("click", () => {
+        post({ type: "choose-mode", mode: "validation" });
+      });
+
+      backManualEl.addEventListener("click", () => {
+        post({ type: "back" });
+      });
+
+      backAutoEl.addEventListener("click", () => {
+        post({ type: "back" });
+      });
+
+      backValidationEl.addEventListener("click", () => {
+        post({ type: "back" });
+      });
+
+      // Left button: only generates a rasterized copy of the source frame.
+      downloadEl.addEventListener("click", () => {
+        post({ type: "replace-copy", scale: getScale() });
+        setStatus("正在生成副本…");
+      });
+
+      // Right button: only rasterizes the currently selected modules in place
+      // (used inside the copy). In compact mode it replaces the source layers.
+      replaceEl.addEventListener("click", () => {
+        post({
+          type: "replace",
+          scale: getScale(),
+          keepOriginal: false
+        });
+        setStatus(mode === "compact" ? "正在替换图层…" : "正在转 PNG…");
+      });
+
+      makeComponentsEl.addEventListener("click", () => {
+        post({ type: "make-components" });
+        setStatus("正在生成模块组件画布…");
+      });
+
+      // ----- Validation mode -----
+      genRawHtmlEl.addEventListener("click", () => {
+        post({ type: "generate-raw-html" });
+        setValStatus("正在生成 Raw HTML…");
+      });
+
+      genHtmlPackageEl.addEventListener("click", () => {
+        post({ type: "generate-html-package" });
+        setValStatus("正在批量生成 HTML 文件包…");
+      });
+
+      sendHtmlPackageEl.addEventListener("click", () => {
+        sendHtmlPackageEl.disabled = true;
+        post({ type: "send-html-package" });
+        setValStatus("正在生成并发送到 Web MVP…");
+      });
+
+      rawCopyHtmlEl.addEventListener("click", () => {
+        const ok = copyText(rawHtmlFile.html);
+        setValStatus(ok ? "Raw HTML 已复制到剪贴板" : "复制失败 — HTML 已选中", !ok);
+      });
+
+      rawDownloadHtmlEl.addEventListener("click", () => {
+        downloadText(rawHtmlFile.fileName || "raw.html", rawHtmlFile.html, "text/html");
+        setValStatus(`已下载 ${rawHtmlFile.fileName || "raw.html"}`);
+      });
+
+      valAddHotspotEl.addEventListener("click", () => {
+        post({ type: "add-hotspot", action: valHotspotActionEl.value, to: valHotspotTargetEl.value });
+        setValStatus("正在添加热点…");
+      });
+
+      // navigate/overlay need a target page; closeOverlay/back do not.
+      valHotspotActionEl.addEventListener("change", () => {
+        updateHotspotTargetVisibility();
+      });
+
+      function updateHotspotTargetVisibility() {
+        const action = valHotspotActionEl.value;
+        const needsTarget = action === "navigate" || action === "overlay";
+        valHotspotTargetRowEl.hidden = !needsTarget;
+      }
+
+      valClearHotspotsEl.addEventListener("click", () => {
+        post({ type: "clear-hotspots" });
+        setValStatus("已清空热点");
+      });
+
+      valDownloadZipEl.addEventListener("click", () => {
+        try {
+          const enc = new TextEncoder();
+          const files = [
+            { name: "index.html", bytes: enc.encode(valFiles.indexHtml) },
+            { name: "styles.css", bytes: enc.encode(valFiles.stylesCss) },
+            { name: "interactions.json", bytes: enc.encode(valFiles.interactionsJson) }
+          ];
+          for (const png of valPngs) {
+            files.push({ name: `assets/${png.fileName}`, bytes: png.bytes });
+          }
+          const zipBytes = buildZip(files);
+          const blob = new Blob([zipBytes], { type: "application/zip" });
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement("a");
+          const zipName = valPackageKind === "raw-html" ? "raw-validation-package.zip" : "validation-package.zip";
+          anchor.href = url;
+          anchor.download = zipName;
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+          URL.revokeObjectURL(url);
+          const countLabel = valPackageKind === "raw-html" ? "Raw HTML 页面" : "页面 PNG";
+          setValStatus(`已下载 ${zipName}（${valPackageKind === "raw-html" ? "可交互" : valPngs.length + " 个"}${countLabel}）`);
+        } catch (error) {
+          setValStatus("打包失败：" + (error && error.message ? error.message : "未知错误"), true);
+        }
+      });
+
+      function renderValidationState(message) {
+        renderRawHtmlTarget(message.rawTarget);
+        const frames = message.frames || [];
+        const hasSelectedFrames = frames.length > 0;
+        genHtmlPackageEl.disabled = !hasSelectedFrames;
+        sendHtmlPackageEl.disabled = !hasSelectedFrames;
+
+        if (!message.hasPackage) {
+          valHotspotsEl.hidden = true;
+          return;
+        }
+
+        valPackageKind = message.packageKind || valPackageKind;
+        valHotspotsEl.hidden = false;
+
+        // Target dropdown: all pages (defaults to the page after the candidate's
+        // source page when possible).
+        const pages = message.pages || [];
+        const candidate = message.candidate || null;
+        const prevValue = valHotspotTargetEl.value;
+        valHotspotTargetEl.innerHTML = "";
+        for (const page of pages) {
+          const opt = document.createElement("option");
+          opt.value = page.key;
+          opt.textContent = `${page.key} · ${page.name}`;
+          valHotspotTargetEl.appendChild(opt);
+        }
+        // Preserve prior choice; otherwise default to next page after source.
+        if (prevValue && pages.some((p) => p.key === prevValue)) {
+          valHotspotTargetEl.value = prevValue;
+        } else if (candidate) {
+          const fromIdx = pages.findIndex((p) => p.key === candidate.fromKey);
+          const next = pages[fromIdx + 1];
+          if (next) {
+            valHotspotTargetEl.value = next.key;
+          }
+        }
+
+        // Current hotspot candidate from the canvas selection.
+        if (candidate) {
+          valHotspotCurrentEl.textContent = `当前热点来自 ${candidate.fromKey}（${candidate.nodeName}）`;
+          valAddHotspotEl.disabled = false;
+        } else {
+          valHotspotCurrentEl.textContent = "在页面 Frame 内选中一个子节点作为热点区域";
+          valAddHotspotEl.disabled = true;
+        }
+        updateHotspotTargetVisibility();
+
+        // Hotspot list — one row per interaction, with a delete button.
+        const hotspots = message.hotspots || [];
+        valHotspotListEl.innerHTML = "";
+        hotspots.forEach((h, i) => {
+          const div = document.createElement("div");
+          div.className = "val-hotspot-item";
+
+          const info = document.createElement("span");
+          info.className = "val-hotspot-info";
+          const target = h.to ? " → " + h.to : "";
+          info.textContent = `${h.from} · ${hotspotActionLabel(h.action)}${target} · ${formatRect(h.rect)}`;
+          info.title = info.textContent;
+
+          const del = document.createElement("button");
+          del.className = "val-hotspot-del";
+          del.textContent = "×";
+          del.title = "删除该热点";
+          del.addEventListener("click", () => {
+            post({ type: "remove-hotspot", index: i });
+            setValStatus("正在删除热点…");
+          });
+
+          div.appendChild(info);
+          div.appendChild(del);
+          valHotspotListEl.appendChild(div);
+        });
+        valClearHotspotsEl.hidden = hotspots.length === 0;
+        measureAndResize();
+      }
+
+      function renderRawHtmlTarget(rawTarget) {
+        if (!rawTarget) {
+          rawHtmlTargetEl.textContent = "选中一个节点，按 2.html 的 inline-style 逻辑生成 HTML。";
+          genRawHtmlEl.disabled = true;
+          return;
+        }
+
+        rawHtmlTargetEl.textContent = `Raw HTML 目标：${rawTarget.name} · ${rawTarget.type} · ${rawTarget.width}×${rawTarget.height}`;
+        genRawHtmlEl.disabled = false;
+      }
+
+      // Format a ratio rect (0..1) as "x%,y% · w%×h%".
+      function formatRect(rect) {
+        if (!rect) {
+          return "";
+        }
+        const pct = (v) => Math.round((v || 0) * 100) + "%";
+        return `${pct(rect.x)},${pct(rect.y)} · ${pct(rect.width)}×${pct(rect.height)}`;
+      }
+
+      function hotspotActionLabel(action) {
+        if (action === "navigate") return "跳转页面";
+        if (action === "overlay") return "打开浮层";
+        if (action === "closeOverlay") return "关闭浮层";
+        if (action === "back") return "返回上一页";
+        return action || "";
+      }
+
+      function renderValidationPackage(message) {
+        // Release previously created object URLs before creating new ones.
+        for (const png of valPngs) {
+          URL.revokeObjectURL(png.url);
+        }
+        valPngs = [];
+        valPackageKind = message.packageKind || "png";
+
+        valFiles = {
+          indexHtml: message.indexHtml || "",
+          stylesCss: message.stylesCss || "",
+          interactionsJson: message.interactionsJson || ""
+        };
+
+        valPreviewEl.innerHTML = "";
+        for (const page of message.pages || []) {
+          if (valPackageKind === "raw-html") {
+            const wrap = document.createElement("div");
+            wrap.className = "val-page";
+            const label = document.createElement("div");
+            label.className = "val-page-label";
+            label.textContent = `${page.index}. ${page.name} · ${page.width}×${page.height} · Raw HTML`;
+            wrap.appendChild(label);
+            valPreviewEl.appendChild(wrap);
+            continue;
+          }
+
+          const bytes = new Uint8Array(page.bytes);
+          const blob = new Blob([bytes], { type: "image/png" });
+          const url = URL.createObjectURL(blob);
+          // Keep raw bytes for zipping and the object URL for the preview img.
+          valPngs.push({ fileName: page.fileName, url, bytes });
+
+          const wrap = document.createElement("div");
+          wrap.className = "val-page";
+          const label = document.createElement("div");
+          label.className = "val-page-label";
+          label.textContent = `${page.index}. ${page.name} · ${page.width}×${page.height}`;
+          const img = document.createElement("img");
+          img.className = "val-page-img";
+          img.src = url;
+          img.alt = page.name;
+          wrap.appendChild(label);
+          wrap.appendChild(img);
+          valPreviewEl.appendChild(wrap);
+        }
+
+        valActionsEl.hidden = (message.pages || []).length === 0;
+        valDownloadZipEl.textContent = valPackageKind === "raw-html" ? "下载 Raw HTML 交互包" : "下载验证包";
+        measureAndResize();
+      }
+
+      function setValStatus(message, isError = false) {
+        valStatusEl.textContent = message;
+        valStatusEl.className = isError ? "error" : "";
+      }
+
+      function downloadHtmlPackage(message) {
+        try {
+          const zipBytes = buildHtmlPackageBytes(message);
+          const blob = new Blob([zipBytes], { type: "application/zip" });
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement("a");
+          const fileName = message.fileName || "figma-html-package.zip";
+          anchor.href = url;
+          anchor.download = fileName;
+          document.body.appendChild(anchor);
+          anchor.click();
+          anchor.remove();
+          URL.revokeObjectURL(url);
+          setValStatus(`已下载 ${fileName}（${(message.pages || []).length} 个 HTML 页面）`);
+        } catch (error) {
+          setValStatus("HTML 文件包下载失败：" + (error && error.message ? error.message : "未知错误"), true);
+        }
+      }
+
+      const WEB_MVP_ORIGIN = "http://localhost:5174";
+
+      function buildHtmlPackageBytes(message) {
+        const enc = new TextEncoder();
+        const files = [
+          { name: "manifest.json", bytes: enc.encode(message.manifestJson || "{}") },
+          { name: "design.json", bytes: enc.encode(message.designJson || "{}") }
+        ];
+        for (const page of message.pages || []) {
+          files.push({
+            name: page.path,
+            bytes: enc.encode(page.html || "")
+          });
+          if (page.previewPath && page.previewBytes) {
+            files.push({
+              name: page.previewPath,
+              bytes: page.previewBytes instanceof Uint8Array ? page.previewBytes : new Uint8Array(page.previewBytes)
+            });
+          }
+        }
+        return buildZip(files);
+      }
+
+      async function sendHtmlPackageToWebMvp(message) {
+        try {
+          const zipBytes = buildHtmlPackageBytes(message);
+          const response = await fetch(`${WEB_MVP_ORIGIN}/api/import-package`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/zip",
+              "X-Package-Name": message.fileName || "figma-html-package.zip"
+            },
+            body: new Blob([zipBytes], { type: "application/zip" })
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.id) {
+            throw new Error(result.message || `Web MVP 返回 ${response.status}`);
+          }
+          sendHtmlPackageEl.disabled = false;
+          if (result.deliveredToActiveClient) {
+            setValStatus(`已发送 ${(message.pages || []).length} 个页面，Web MVP 将自动归入新方案`);
+          } else {
+            const openUrl = `${WEB_MVP_ORIGIN}/?importPackage=${encodeURIComponent(result.id)}&importMode=auto-scheme`;
+            post({ type: "open-external", url: openUrl });
+            setValStatus(`已发送 ${(message.pages || []).length} 个页面，正在打开 Web MVP…`);
+          }
+        } catch (error) {
+          sendHtmlPackageEl.disabled = false;
+          const reason = error && error.message ? error.message : "无法连接 Web MVP";
+          setValStatus(`发送失败：${reason}。请确认 Web MVP 已在 localhost:5174 启动。`, true);
+        }
+      }
+
+      // ----- Minimal ZIP writer (store / no compression) -----
+      // PNGs are already compressed, so "store" keeps the package valid and
+      // dependency-free. Builds local headers + central directory + EOCD.
+      function crc32(bytes) {
+        let crc = ~0;
+        for (let i = 0; i < bytes.length; i += 1) {
+          crc ^= bytes[i];
+          for (let j = 0; j < 8; j += 1) {
+            crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+          }
+        }
+        return (~crc) >>> 0;
+      }
+
+      function buildZip(files) {
+        const enc = new TextEncoder();
+        const localParts = [];
+        const centralParts = [];
+        let offset = 0;
+
+        for (const file of files) {
+          const nameBytes = enc.encode(file.name);
+          const data = file.bytes;
+          const crc = crc32(data);
+
+          const local = new DataView(new ArrayBuffer(30));
+          local.setUint32(0, 0x04034b50, true);
+          local.setUint16(4, 20, true);
+          local.setUint16(6, 0, true);
+          local.setUint16(8, 0, true); // method 0 = store
+          local.setUint16(10, 0, true);
+          local.setUint16(12, 0, true);
+          local.setUint32(14, crc, true);
+          local.setUint32(18, data.length, true);
+          local.setUint32(22, data.length, true);
+          local.setUint16(26, nameBytes.length, true);
+          local.setUint16(28, 0, true);
+          localParts.push(new Uint8Array(local.buffer), nameBytes, data);
+
+          const central = new DataView(new ArrayBuffer(46));
+          central.setUint32(0, 0x02014b50, true);
+          central.setUint16(4, 20, true);
+          central.setUint16(6, 20, true);
+          central.setUint16(8, 0, true);
+          central.setUint16(10, 0, true);
+          central.setUint16(12, 0, true);
+          central.setUint16(14, 0, true);
+          central.setUint32(16, crc, true);
+          central.setUint32(20, data.length, true);
+          central.setUint32(24, data.length, true);
+          central.setUint16(28, nameBytes.length, true);
+          central.setUint16(30, 0, true);
+          central.setUint16(32, 0, true);
+          central.setUint16(34, 0, true);
+          central.setUint16(36, 0, true);
+          central.setUint32(38, 0, true);
+          central.setUint32(42, offset, true);
+          centralParts.push(new Uint8Array(central.buffer), nameBytes);
+
+          offset += 30 + nameBytes.length + data.length;
+        }
+
+        const centralStart = offset;
+        let centralSize = 0;
+        for (const part of centralParts) {
+          centralSize += part.length;
+        }
+
+        const eocd = new DataView(new ArrayBuffer(22));
+        eocd.setUint32(0, 0x06054b50, true);
+        eocd.setUint16(4, 0, true);
+        eocd.setUint16(6, 0, true);
+        eocd.setUint16(8, files.length, true);
+        eocd.setUint16(10, files.length, true);
+        eocd.setUint32(12, centralSize, true);
+        eocd.setUint32(16, centralStart, true);
+        eocd.setUint16(20, 0, true);
+
+        const all = localParts.concat(centralParts, [new Uint8Array(eocd.buffer)]);
+        let total = 0;
+        for (const part of all) {
+          total += part.length;
+        }
+        const out = new Uint8Array(total);
+        let p = 0;
+        for (const part of all) {
+          out.set(part, p);
+          p += part.length;
+        }
+        return out;
+      }
+
+      // Skill modal open/close. Content is filled in later.
+      function openSkillModal() {
+        skillModalEl.hidden = false;
+      }
+
+      function closeSkillModal() {
+        skillModalEl.hidden = true;
+      }
+
+      skillLinkEl.addEventListener("click", (event) => {
+        event.preventDefault();
+        openSkillModal();
+      });
+
+      skillCopyEl.addEventListener("click", () => {
+        copyText(SKILL_COMMAND);
+        const original = skillCopyEl.textContent;
+        skillCopyEl.textContent = "已复制";
+        setTimeout(() => {
+          skillCopyEl.textContent = original;
+        }, 1500);
+      });
+
+      skillModalCloseEl.addEventListener("click", closeSkillModal);
+
+      // Click on the dimmed overlay (outside the dialog) closes it.
+      skillModalEl.addEventListener("click", (event) => {
+        if (event.target === skillModalEl) {
+          closeSkillModal();
+        }
+      });
+
+      // Esc closes the modal when it is open.
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !skillModalEl.hidden) {
+          closeSkillModal();
+        }
+      });
+
+      rescanEl.addEventListener("click", () => {
+        post({ type: "scan" });
+        setStatus("正在刷新…");
+      });
+
+      wsRefreshEl.addEventListener("click", () => {
+        post({ type: "scan" });
+        setWsStatus("正在刷新选区…");
+      });
+
+      wsAddEl.addEventListener("click", () => {
+        post({ type: "add-placeholders" });
+        setWsStatus("正在添加选中的占位图…");
+      });
+
+      wsCopyEl.addEventListener("click", () => {
+        post({ type: "copy-payload" });
+        setWsStatus("正在生成数据…");
+      });
+
+      wsFileUrlEl.addEventListener("change", () => {
+        post({ type: "set-file-url", url: wsFileUrlEl.value });
+      });
+
+      function renderWorkspace(message) {
+        if (!message.hasWorkspace) {
+          wsEmptyEl.style.display = "";
+          wsDetailsEl.style.display = "none";
+          wsAddEl.disabled = true;
+          wsCopyEl.disabled = true;
+          setWsStatus("暂无工作区");
+          return;
+        }
+
+        wsEmptyEl.style.display = "none";
+        wsDetailsEl.style.display = "";
+        wsSourceEl.textContent = message.sourceFrameName || "—";
+        wsSourceEl.title = message.workspaceName || "";
+        wsDetectedEl.textContent = message.detectedCount || 0;
+        wsSelectedEl.textContent = message.selectedPlaceholderCount || 0;
+        wsCollectedEl.textContent = message.collectedCount || 0;
+        if (typeof message.fileUrl === "string" && document.activeElement !== wsFileUrlEl) {
+          wsFileUrlEl.value = message.fileUrl;
+        }
+        wsAddEl.disabled = (message.selectedPlaceholderCount || 0) === 0;
+        wsCopyEl.disabled = (message.collectedCount || 0) === 0;
+        setWsStatus("就绪");
+        measureAndResize();
+      }
+
+      // Copy arbitrary text via the hidden textarea (works inside the Figma
+      // iframe where navigator.clipboard is often unavailable). Returns whether
+      // the execCommand path succeeded.
+      function copyText(text) {
+        payloadEl.value = text;
+        payloadEl.select();
+        let ok = false;
+        try {
+          ok = document.execCommand("copy");
+        } catch (error) {
+          ok = false;
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {});
+        }
+        return ok;
+      }
+
+      function copyPayload(json) {
+        const ok = copyText(json);
+        setWsStatus(ok ? "MCP 数据已复制到剪贴板" : "复制失败 — 数据已选中", !ok);
+      }
+
+      function setWsStatus(message, isError = false) {
+        wsStatusEl.textContent = message;
+        wsStatusEl.className = isError ? "error" : "";
+      }
+
+      function render() {
+        renderSelection();
+        renderList();
+        const hasSelection = selectedCount > 0;
+        downloadEl.disabled = !hasSelection;
+        replaceEl.disabled = !hasSelection;
+        makeComponentsEl.disabled = !hasSelection;
+        replaceEl.textContent = getReplaceButtonLabel();
+      }
+
+      function renderSelection() {
+        if (selectedCount === 0 || !selected) {
+          selectedEl.innerHTML = `
+            <div class="selected-name">未选中图层</div>
+            <div class="meta">选中一个 frame，进行模块位置和间距的定位</div>
+          `;
+          return;
+        }
+
+        const meta = getSelectionHint();
+
+        if (selectedCount > 1) {
+          selectedEl.innerHTML = `
+            <div class="selected-name">已选中 ${selectedCount} 个模块</div>
+            <div class="meta">${meta}</div>
+          `;
+          return;
+        }
+
+        selectedEl.innerHTML = `
+          <div class="selected-name" title="${escapeHtml(selected.path)}">${escapeHtml(selected.name)}</div>
+          <div class="meta">${meta}</div>
+        `;
+      }
+
+      // Frame-like container types that can be treated as a "big frame" source.
+      const BIG_FRAME_TYPES = ["FRAME", "COMPONENT", "COMPONENT_SET", "SECTION", "GROUP"];
+
+      // A "big frame" = a top-level frame-like node (a direct child of the page).
+      // `path` equals `name` only when the node has no parent above the page, so
+      // it distinguishes the source page frame from modules nested inside it.
+      // (`selected.depth` can't be used — code.ts always sends it as 0.)
+      function isBigFrame(node) {
+        return (
+          !!node &&
+          node.path === node.name &&
+          BIG_FRAME_TYPES.indexOf(node.type) !== -1
+        );
+      }
+
+      // Selection hint shown under the selected layer:
+      //  - a copy already exists  -> guide selecting modules inside the copy
+      //  - a big frame is selected -> guide generating a copy first
+      //  - otherwise              -> nudge the user to select a frame
+      function getSelectionHint() {
+        if (fullStage === "png") {
+          return "在副本中选中需要转为 PNG 的模块，帮助前端明确模块边界与模块间距";
+        }
+        if (isBigFrame(selected)) {
+          return "先生成副本，避免改动原稿；在副本中将模块转为 PNG，占位展示模块位置和间距";
+        }
+        return "选中一个 frame，进行模块位置和间距的定位";
+      }
+
+      function renderList() {
+        countEl.textContent = `${candidates.length} 个模块`;
+
+        if (candidates.length === 0) {
+          itemsEl.innerHTML = `<div class="empty">未找到可导出的模块</div>`;
+          return;
+        }
+
+        itemsEl.innerHTML = "";
+        const fragment = document.createDocumentFragment();
+
+        for (const candidate of candidates) {
+          const button = document.createElement("button");
+          button.className = `item${candidate.selected ? " selected-item" : ""}`;
+          button.style.paddingLeft = `${16 + Math.min(candidate.depth, 6) * 10}px`;
+          button.title = candidate.path;
+          button.innerHTML = `
+            <span>
+              <span class="item-name">${escapeHtml(candidate.name)}</span>
+              <span class="item-path">${escapeHtml(candidate.type)} · ${candidate.width}×${candidate.height}</span>
+            </span>
+            <span class="pill">定位</span>
+          `;
+          button.addEventListener("click", () => {
+            post({ type: "focus", id: candidate.id });
+            setStatus(`已定位到 ${candidate.name}`);
+          });
+          fragment.appendChild(button);
+        }
+
+        itemsEl.appendChild(fragment);
+      }
+
+      function post(pluginMessage) {
+        parent.postMessage({ pluginMessage }, "*");
+      }
+
+      // Fit the window to the active view's content height. The fixed-content
+      // views (chooser, workspace, validation) auto-fit; the shell keeps its own
+      // scrolling module list at its designed height.
+      function measureAndResize() {
+        var selector = null;
+        if (mode === "chooser") selector = "main.chooser";
+        else if (mode === "workspace") selector = "main.workspace";
+        else if (mode === "validation") selector = "main.validation";
+        if (!selector) {
+          return;
+        }
+        requestAnimationFrame(() => {
+          const active = document.querySelector(selector);
+          if (!active) {
+            return;
+          }
+          const height = Math.ceil(active.getBoundingClientRect().height);
+          post({ type: "resize", height });
+        });
+      }
+
+      // Export scale is fixed at 2x (the 倍率 selector was removed).
+      function getScale() {
+        return 2;
+      }
+
+      function getReplaceButtonLabel() {
+        if (mode === "compact") {
+          return selectedCount > 1 ? `替换 ${selectedCount} 个选中模块` : "替换选中模块";
+        }
+
+        if (mode === "full") {
+          return selectedCount > 1 ? `转 PNG（${selectedCount} 个）` : "转 PNG";
+        }
+
+        return selectedCount > 1 ? `替换 ${selectedCount} 个为 PNG` : "替换为 PNG";
+      }
+
+      function setStatus(message, isError = false) {
+        statusEl.textContent = message;
+        statusEl.className = isError ? "error" : "";
+      }
+
+      function downloadBytes(fileName, bytes) {
+        const blob = new Blob([new Uint8Array(bytes)], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function downloadText(fileName, text, type = "text/plain") {
+        const blob = new Blob([text], { type });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      post({ type: "ready" });
+    </script>
+  </body>
+</html>
