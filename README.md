@@ -1,3 +1,6 @@
+<img width="3840" height="1918" alt="image" src="https://github.com/user-attachments/assets/4718f8d7-aa85-4330-ab4f-23f7f71f61d5" />
+
+
 # Figma 一键 UI 走查
 
 将 Figma 导出的设计数据与当前网页对照，生成可查看局部证据的 UI 走查报告。程序测量文字、颜色、圆角与间距；Jev 协助确定结构复杂时的对象对应关系。
